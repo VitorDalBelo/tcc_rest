@@ -31,6 +31,18 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @UseGuards(AuthGuard('google'))
+  @Get("/login/google")
+  async loginGoogle(@Req() req){}
+
+  @UseGuards(AuthGuard('google'))
+  @Get("/login/google/callback")
+  async loginGoogleCallback(@Req() req : any){
+    return this.authService.login(req.user);
+  }
+
+
+
 
 
 }

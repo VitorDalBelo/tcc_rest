@@ -7,6 +7,7 @@ import { UsersModule } from 'src/users/users.module';
 import { BasicAuthStrategy } from './strategies/basic.strategy';
 import { JwtAuthStrategy } from './strategies/jwt.strategy';
 import 'dotenv/config';
+import { GoogleAuthStrategy } from './strategies/google.strategy';
 
 @Module({
   imports:[UsersModule,PassportModule,JwtModule.register({
@@ -14,6 +15,6 @@ import 'dotenv/config';
     secret:process.env.JWT_SECRET,
   })],
   controllers: [AuthController],
-  providers: [AuthService,BasicAuthStrategy,JwtAuthStrategy]
+  providers: [AuthService,BasicAuthStrategy,JwtAuthStrategy,GoogleAuthStrategy]
 })
 export class AuthModule {}
