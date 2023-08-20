@@ -13,7 +13,10 @@ export class DatabaseConfigService implements TypeOrmOptionsFactory{
             username:process.env.DB_USER,
             password:process.env.DB_PASSWORD,
             database:process.env.DB_NAME,
-            entities:[__dirname + '/../**/*.entity{.js,ts}']
+            entities:[__dirname + '/../**/*.entity{.js,ts}'],
+            ssl: {
+                rejectUnauthorized: false, // Isso desativa a verificação de certificado SSL. Use com cautela!
+            }
 
        }
     }
