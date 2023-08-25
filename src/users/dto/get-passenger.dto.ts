@@ -5,4 +5,5 @@ export class GetPassengerDto {
     profile:string;
     passenger_id:number;
     cpf:string;
+    photo:string
 }
