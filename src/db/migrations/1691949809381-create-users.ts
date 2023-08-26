@@ -9,6 +9,7 @@ export class Migrations1691949809381 implements MigrationInterface {
                 name character varying(100) NOT NULL,
                 email character varying(100) NOT NULL,
                 hashpassword character varying(100) NOT NULL,
+                photo character varying(255) DEFAULT 'avatars/noimage.jpg'::character varying,
                 profile character varying(20) DEFAULT 'user'::character varying
             );`
             )

@@ -10,6 +10,8 @@ export class User {
     email:string;
     @Column({name:'hashpassword',length:255,nullable:false})
     hashpassword:string;
+    @Column({name:'photo',length:255})
+    photo:string;
     @Column({name:'profile',length:255,nullable:false})
     profile:string;
 }

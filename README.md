@@ -26,6 +26,11 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Create database with docker
+```bash
+$ sudo docker run -d --name vanfacil -e POSTGRES_PASSWORD=1010 -e POSTGRES_DB=vanfacil -p 5002:5432 --restart always postgres
+```
+
 ## Installation
 
 ```bash

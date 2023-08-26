@@ -25,14 +25,18 @@ export class UsersService {
     const userExits = await this.findOne(newPassenger.email)
     if(userExits) throw new ConflictException("Existe outro usuário com este email");
     const passengerEntity = this.passengerRepository.create(newPassenger);
-    return await this.passengerRepository.save(passengerEntity);
+    const {user_id} = await this.passengerRepository.save(passengerEntity);
+    const {hashpassword,...passenger} = await this.passengerRepository.findOneBy({user_id});
+    return passenger
     
   }
   async createDriver(newDriver : CreateDriverDto) {
     const userExits = await this.findOne(newDriver.email)
     if(userExits) throw new ConflictException("Existe outro usuário com este email");
     const driverEntity = this.driverRepository.create(newDriver);
-    return await this.driverRepository.save(driverEntity);
+    const {user_id} = await this.driverRepository.save(driverEntity);
+    const {hashpassword,...driver} = await this.driverRepository.findOneBy({user_id});
+    return driver
   }
 
   async findAll() {
