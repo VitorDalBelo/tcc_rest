@@ -6,13 +6,17 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from 'src/users/users.module';
 import { BasicAuthStrategy } from './strategies/basic.strategy';
 import { JwtAuthStrategy } from './strategies/jwt.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import 'dotenv/config';
+import { AccessToken } from './entities/access-token.entity';
 
 @Module({
   imports:[UsersModule,PassportModule,JwtModule.register({
     signOptions:{expiresIn:"3600s"},
     secret:process.env.JWT_SECRET,
-  })],
+  }),
+  TypeOrmModule.forFeature([AccessToken])
+],
   controllers: [AuthController],
   providers: [AuthService,BasicAuthStrategy,JwtAuthStrategy]
 })

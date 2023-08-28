@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { AccessToken } from "src/auth/entities/access-token.entity";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Driver } from "./driver.entity";
+import { Passenger } from "./passenger.entity";
 
 @Entity({name:'users'})
 export class User {
@@ -14,4 +17,10 @@ export class User {
     photo:string;
     @Column({name:'profile',length:255,nullable:false})
     profile:string;
+    @OneToOne(() => AccessToken, accessToken => accessToken.user_id) 
+    accessToken: AccessToken; 
+    @OneToOne(() => Driver, driver => driver.user_id) 
+    driver: Driver; 
+    @OneToOne(() => Passenger, passager => passager.user_id) 
+    passager: Passenger; 
 }

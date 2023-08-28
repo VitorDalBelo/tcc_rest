@@ -1,18 +1,22 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { BadRequestException, Injectable, InternalServerErrorException , NotFoundException } from '@nestjs/common';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginUserInput } from './dto/login-user.input';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from "bcrypt"
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AccessToken } from './entities/access-token.entity';
+import { Repository } from 'typeorm';
 
 
 @Injectable()
 export class AuthService {
   constructor(
     private  userService : UsersService,
-    private  jwtService : JwtService  
+    private  jwtService : JwtService ,
+    @InjectRepository(AccessToken)
+    private readonly accessTokenRepository : Repository<AccessToken>
   ){}
 
   
@@ -55,16 +59,30 @@ export class AuthService {
     else throw new BadRequestException("papel de usuário inesistente.");
   }
 
-  login(user:User){
-    return{
-      access_token: this.jwtService.sign(user),
-      user
+  async login(user:User){
+    const {hashpassword,...userDTO} = user;
+    const response ={
+      access_token: this.jwtService.sign(userDTO),
+      user:userDTO
     }
+    const accessTokenEntity:AccessToken =  this.accessTokenRepository.create({token:response.access_token,user_id:user.user_id});
+
+     this.accessTokenRepository.insert(accessTokenEntity)
+     .catch(()=>{
+      this.accessTokenRepository.update(user.user_id,{token:response.access_token})
+      .catch(e=>console.log(e))
+     })
+
+    return response;
     
   }
 
-  findAll() {
-    return `This action returns all auth`;
+
+  async refresh(oldToken:string)  {
+    const accessTokenEntity : any = await this.accessTokenRepository.findOne({where:{token:oldToken},relations:["user_id"],relationLoadStrategy:"query"});
+    if(!accessTokenEntity || !accessTokenEntity.user_id) throw new NotFoundException("Usuário não encontrado");
+    const user = {...accessTokenEntity.user_id};
+    return await this.login(user);
   }
 
   findOne(id: number) {

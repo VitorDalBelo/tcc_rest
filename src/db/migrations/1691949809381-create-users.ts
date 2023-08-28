@@ -15,21 +15,17 @@ export class Migrations1691949809381 implements MigrationInterface {
             )
         await queryRunner.query(
             `CREATE TABLE public.drivers (
-                profile character varying(20) DEFAULT 'driver'::character varying,
                 driver_id SERIAL PRIMARY KEY,
                 cnpj character varying(20) NOT NULL,
-                CONSTRAINT drivers_profile_check CHECK (((profile)::text = 'driver'::text))
-            )
-            INHERITS (public.users);`
+                user_id INT REFERENCES users(user_id) ON DELETE CASCADE NOT NULL
+            );`
             )
         await queryRunner.query(
                 `CREATE TABLE public.passengers (
-                    profile character varying(20) DEFAULT 'passenger'::character varying,
                     passenger_id SERIAL PRIMARY KEY,
                     cpf character varying(14) NOT NULL,
-                    CONSTRAINT passengers_profile_check CHECK (((profile)::text = 'passenger'::text))
-                )
-                INHERITS (public.users);`
+                    user_id INT REFERENCES users(user_id) ON DELETE CASCADE NOT NULL
+                );`
                 )
     }
 

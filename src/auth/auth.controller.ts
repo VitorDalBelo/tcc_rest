@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginUserInput } from './dto/login-user.input';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @Controller('/auth')
 export class AuthController {
@@ -28,7 +29,13 @@ export class AuthController {
   @UseGuards(AuthGuard('basic'))
   @Post("/login")
   async login(@Req() req : any){
-    return this.authService.login(req.user);
+    return await this.authService.login(req.user);
+  }
+
+  @Post("/refresh")
+  async refresh(@Req() req : Request){
+    const oldToken = req.headers.authorization.replace("Bearer ","");
+    return this.authService.refresh(oldToken);
   }
 
 
