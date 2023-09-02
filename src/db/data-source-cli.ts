@@ -10,7 +10,9 @@ const dataSourceOptions: DataSourceOptions ={
     database:process.env.DB_NAME,
     entities:[__dirname + '/../**/*.entity{.js,ts}'],
     migrations:[__dirname + '/migrations/*.{.js,ts}'],
-    ssl: false
+    ssl: {
+        rejectUnauthorized: false, // Isso desativa a verificação de certificado SSL. Use com cautela!
+    }
 }
 
 const dataSource = new DataSource(dataSourceOptions);
