@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { CampusesModule } from './campuses/campuses.module';
 
 
 
@@ -23,6 +24,7 @@ import { join } from 'path';
       rootPath: join(__dirname, '..', 'public'),
     }),
     AuthModule,
+    CampusesModule,
   ],
   controllers: [],
   providers: [],

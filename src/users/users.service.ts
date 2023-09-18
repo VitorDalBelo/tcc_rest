@@ -1,16 +1,26 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Passenger } from './entities/passenger.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Driver } from './entities/driver.entity';
 import { User } from './entities/user.entity';
-import { LoginUserInput } from 'src/auth/dto/login-user.input';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
 import { GetPassengerDto } from './dto/get-passenger.dto';
 import { CreateDriverDto } from './dto/create-driver.dto';
-import { query } from 'express';
+import { Address } from './entities/address.entity';
+import * as Yup from "yup";
+
+const   addressSchema  = Yup.object({
+  bairro: Yup.string().required("O endereço não pode ser cadastrado sem o bairro"),
+  cidade: Yup.string().required("O endereço não pode ser cadastrado sem a cidade"),
+  latitude: Yup.number().typeError("O campo latitude deve ser um valor numérico.").required("O campo latitude é obrigatório."),
+  logradouro: Yup.string().required("O campo logradouro é obrigatório."),
+  longitude: Yup.number().typeError("O campo longitude deve ser um valor numérico.").required("O campo longitude é obrigatório."),
+  numero: Yup.number().typeError("O campo número deve ser um valor numérico.").required("O campo número é obrigatório."),
+  pais: Yup.string().required("O campo país é obrigatório."),
+  uf: Yup.string().required("O campo UF é obrigatório."),
+})
 
 @Injectable()
 export class UsersService {
@@ -21,14 +31,32 @@ export class UsersService {
     private readonly passengerRepository : Repository<Passenger>,
     @InjectRepository(User)
     private readonly userRepository : Repository<User>,
-    
-    private dataSource: DataSource
+    @InjectRepository(Address)
+    private readonly addressRepository : Repository<Address>,
+        
+    private dataSource: DataSource,
   ){}
- async createPassenger(newPassenger : CreatePassengerDto) : Promise<GetPassengerDto> {
-   const userExits = await this.findOne(newPassenger.email)
+
+  async validateAddress(address:object) {
+    return  addressSchema.validate(address)
+            .then(()=>{
+              return {result:true,message:""}
+            })
+            .catch(e=>{
+              return {result:false,message:e.errors[0]}
+            })
+  }
+
+
+
+  async createPassenger(newPassenger : CreatePassengerDto) : Promise<GetPassengerDto> {
+   const userExits = await this.findOne(newPassenger.email);
    if(userExits) throw new ConflictException("Existe outro usuário com este email");
    const queryRunner = this.dataSource.createQueryRunner();
-   const {cpf} = newPassenger;
+   const {address} = newPassenger;
+   if(!address) throw new BadRequestException("É necessario informar o endereço do usuário.");
+   const addressValidation = await this.validateAddress(address);
+   if(!addressValidation.result) throw new BadRequestException(addressValidation.message);
    let user = {
      name:newPassenger.name,
      hashpassword: newPassenger.hashpassword,
@@ -42,11 +70,13 @@ export class UsersService {
     try{
       const userEntity : User =  await this.userRepository.create(user);
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
-      const passenger = {cpf:cpf,user_id:userInfo.user_id};
+      const addressEntity : Address = await this.addressRepository.create(address);
+      const addressInfo = await queryRunner.manager.save(addressEntity);
+      const passenger = {user_id:userInfo.user_id,address_id:addressInfo.id};
       const passengerEntity =  await this.passengerRepository.create(passenger);
       const passengerInfo = await queryRunner.manager.save(passengerEntity);
       await queryRunner.commitTransaction();
-      return {...userInfo,...passengerInfo};
+      return {...userInfo,...passengerInfo,address:addressInfo};
 
     }catch(err){
       console.log("transaction_error",err)

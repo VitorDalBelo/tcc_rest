@@ -32,16 +32,11 @@ export class AuthService {
       return null ;
   }    
   async singup(loginUserInput: LoginUserInput,profile:string) {
-    const hashpassword = await bcrypt.hash(loginUserInput.password,10);
-    const newUser : any = {
-      name:loginUserInput.name,
-      hashpassword,
-      email:loginUserInput.email,
-    }
+    const {password,...rest} = loginUserInput;
+    const hashpassword = await bcrypt.hash(password,10);
+    const newUser : any = { hashpassword,...rest};
     if(profile === "passenger" ) {
-      if(!loginUserInput.cpf) throw new BadRequestException("É necessario informar o cpf se cadastrar como passageiro");
       if(loginUserInput.cnpj) throw new BadRequestException("Passageiros não possuem cnpj");
-      newUser.cpf = String(loginUserInput.cpf).replace(/\D/g,'');
       const passenger = await this.userService.createPassenger(newUser);
       if(!passenger) throw new InternalServerErrorException("servidor falhou ")
       return passenger
