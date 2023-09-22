@@ -10,8 +10,7 @@ const dataSourceOptions: DataSourceOptions ={
     database:process.env.DB_NAME,
     entities:[__dirname + '/../**/*.entity{.js,ts}'],
     migrations:[__dirname + '/seeds/*.{.js,ts}'],
-    migrationsTableName:"seeds",
-    
+    migrationsTableName:"seeds",    
     // ssl: {
     //     rejectUnauthorized: false, // Isso desativa a verificação de certificado SSL. Use com cautela!
     // }

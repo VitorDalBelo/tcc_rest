@@ -62,9 +62,8 @@ export class UsersService {
      hashpassword: newPassenger.hashpassword,
      email:newPassenger.email,
      profile: "passenger",
-     
+     phone: newPassenger.phone,
     }
-
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try{
@@ -72,7 +71,7 @@ export class UsersService {
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
       const addressEntity : Address = await this.addressRepository.create(address);
       const addressInfo = await queryRunner.manager.save(addressEntity);
-      const passenger = {user_id:userInfo.user_id,address_id:addressInfo.id};
+      const passenger = {user_id:userInfo.user_id,address_id:addressInfo.id,campus_id:newPassenger.campus_id};
       const passengerEntity =  await this.passengerRepository.create(passenger);
       const passengerInfo = await queryRunner.manager.save(passengerEntity);
       await queryRunner.commitTransaction();
@@ -126,6 +125,12 @@ export class UsersService {
     return await this.userRepository.findOne({where:{email}});
   }
 
+  async findOnePassenger(userId:number) : Promise<Passenger | null>{
+    return await this.passengerRepository.findOne({where:{user_id:userId}});
+  }
+  async findOneDriver(userId:number) : Promise<Driver | null>{
+    return await this.driverRepository.findOne({where:{user_id:userId}});
+  }
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }

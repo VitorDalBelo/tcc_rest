@@ -6,17 +6,17 @@ export class Migrations2691949809381 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         const campuses = [
                     {
-                    id:undefined,
+                    id:1,
                     campus:"Barcelona",
                     address_id: undefined
                     },
                     {
-                    id:undefined,
+                    id:2,
                     campus:"Centro",
                     address_id: undefined
                     },
                     {
-                    id:undefined,
+                    id:3,
                     campus:"Conceição",
                     address_id: undefined
                     }

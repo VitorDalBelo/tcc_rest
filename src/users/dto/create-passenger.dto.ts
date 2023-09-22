@@ -5,5 +5,7 @@ export class CreatePassengerDto {
     name:string;
     email:string;
     hashpassword:string;
-    address:Address
+    phone:string;
+    address:Address;
+    campus_id:number
 }
