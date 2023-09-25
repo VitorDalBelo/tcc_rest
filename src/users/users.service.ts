@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Passenger } from './entities/passenger.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
 import { Driver } from './entities/driver.entity';
 import { User } from './entities/user.entity';
 import { CreatePassengerDto } from './dto/create-passenger.dto';
@@ -10,6 +10,8 @@ import { GetPassengerDto } from './dto/get-passenger.dto';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { Address } from './entities/address.entity';
 import * as Yup from "yup";
+import { NotFoundError } from 'rxjs';
+import { Coords } from 'src/communIntefaces';
 
 const   addressSchema  = Yup.object({
   bairro: Yup.string().required("O endereço não pode ser cadastrado sem o bairro"),
@@ -36,6 +38,30 @@ export class UsersService {
         
     private dataSource: DataSource,
   ){}
+
+
+  async atualizaRegiao(user_id: number, regiaoDeAtuacao: Array<Coords>) {
+    try {
+      const driver = await this.driverRepository.findOne({where:{ user_id }});
+      if (!driver) {
+        throw new NotFoundException('Motorista não encontrado');
+      }
+
+      let coords = ""
+
+      regiaoDeAtuacao.forEach(coord =>{
+        coords += `'{"latitude": ${coord.latitude}, "longitude": ${coord.longitude}}'::jsonb,`
+      })
+      coords = coords.slice(0,-1);
+
+
+      await this.dataSource.createQueryRunner().query(`update drivers set regiaoDeAtuacao = ARRAY[${coords}]where user_id = ${user_id}`);
+  
+      return {...driver,regiaoDeAtuacao };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update driver region');
+    }
+  }
 
   async validateAddress(address:object) {
     return  addressSchema.validate(address)
@@ -104,7 +130,7 @@ export class UsersService {
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
       const passenger = {cnpj:cnpj,user_id:userInfo.user_id};
       const driverEntity =  await this.driverRepository.create(passenger);
-      const driverInfo = await queryRunner.manager.save(driverEntity);
+      const {regiaoDeAtuacao,...driverInfo} = await queryRunner.manager.save(driverEntity);
       await queryRunner.commitTransaction();
       return {...userInfo,...driverInfo };
     }catch(err){
