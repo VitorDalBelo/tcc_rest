@@ -40,6 +40,9 @@ export class UsersService {
   ){}
 
 
+  async getUserDriverInfo(user_id:number){
+      this.userRepository.
+  }
   async atualizaRegiao(user_id: number, regiaoDeAtuacao: Array<Coords>,preview:string) {
     try {
       const driver = await this.driverRepository.findOne({where:{ user_id }});
