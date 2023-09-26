@@ -40,7 +40,7 @@ export class UsersService {
   ){}
 
 
-  async atualizaRegiao(user_id: number, regiaoDeAtuacao: Array<Coords>) {
+  async atualizaRegiao(user_id: number, regiaoDeAtuacao: Array<Coords>,preview:string) {
     try {
       const driver = await this.driverRepository.findOne({where:{ user_id }});
       if (!driver) {
@@ -55,10 +55,11 @@ export class UsersService {
       coords = coords.slice(0,-1);
 
 
-      await this.dataSource.createQueryRunner().query(`update drivers set regiaoDeAtuacao = ARRAY[${coords}]where user_id = ${user_id}`);
+      await this.dataSource.createQueryRunner().query(`update drivers set mapaPreview = '${preview}' , regiaoDeAtuacao = ARRAY[${coords}]where user_id = ${user_id}`);
   
       return {...driver,regiaoDeAtuacao };
     } catch (error) {
+      console.log(error)
       throw new InternalServerErrorException('Failed to update driver region');
     }
   }
