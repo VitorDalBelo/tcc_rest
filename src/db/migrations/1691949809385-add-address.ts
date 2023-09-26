@@ -6,7 +6,7 @@ export class Migrations1691949809385 implements MigrationInterface {
         await queryRunner.query(
             `
             ALTER TABLE public.passengers
-            ADD COLUMN address_id INT NOT NULL REFERENCES Addresses(id) ON DELETE CASCADE NOT NULL ;
+            ADD COLUMN address_id INT  REFERENCES Addresses(id) ON DELETE CASCADE ;
             `
             )
     }

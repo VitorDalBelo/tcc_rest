@@ -12,6 +12,7 @@ export class Driver {
     mapaPreview:string;
     @Column("json",{name:"regiaodeatuacao" , array:true})
     regiaoDeAtuacao:Array<Coords>;
+    
     @OneToOne(() => User) 
     @JoinColumn({ name: 'user_id' })
     user_id: number;

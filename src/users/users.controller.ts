@@ -26,6 +26,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('/driver/me')
+  @UseGuards(AuthGuard('jwt'))
+  async getMeDriver(@Req() req : Request){
+    const user = req.user as User;
+    return await this.usersService.getUserDriverInfo(user.user_id);
+  }
+
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.usersService.findOne(Number(id));
