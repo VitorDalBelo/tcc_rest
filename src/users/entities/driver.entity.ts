@@ -10,9 +10,11 @@ export class Driver {
     cnpj:string;
     @Column({name:'mapapreview'})
     mapaPreview:string;
+    @Column({name:'descricao'})
+    descricao:string;
     @Column("json",{name:"regiaodeatuacao" , array:true})
     regiaoDeAtuacao:Array<Coords>;
-    
+
     @OneToOne(() => User) 
     @JoinColumn({ name: 'user_id' })
     user_id: number;
