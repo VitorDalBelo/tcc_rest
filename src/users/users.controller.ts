@@ -26,6 +26,20 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('/drivers/me')
+  @UseGuards(AuthGuard('jwt'))
+  async getMeDriver(@Req() req : Request){
+    const user = req.user as User;
+    return await this.usersService.getUserDriverInfo(user.user_id);
+  }
+
+  @Get('/drivers/search')
+  @UseGuards(AuthGuard('jwt'))
+  async searchDriver(@Req() req : Request){
+    const user = req.user as User;
+    if(user.profile !== "passenger") throw new ForbiddenException("apenas passageiros tem acesso a pesquisa de motoristas");
+    return await this.usersService.getDriversForPassenger()    
+  }
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.usersService.findOne(Number(id));
@@ -36,15 +50,16 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FilesInterceptor("imagem"))
   async holdCoords( @Body() body: regiao , @Req() req : Request , @UploadedFile() file: Express.Multer.File){
+    console.log("oi")
     const regiao = JSON.parse(body.regiaoDeAtuacao)
     const user  = req.user as User;
 
     if(user.profile !== "driver") throw new ForbiddenException("Você não tem permissão de motorista.");
     const imageBuffer = Buffer.from(body.imagem, 'base64');
-    const filename = `${Date.now()}_${user.user_id}.png`;
-    const filePath = path.join(__dirname, '..','..', 'public','mapas', filename);
+    const filename = `public/mapas/${Date.now()}_${user.user_id}.png`;
+    const filePath = path.join(__dirname, '..','..', filename);
     fs.writeFileSync(filePath, imageBuffer);
-    const result = await this.usersService.atualizaRegiao(Number(user.user_id),regiao)
+    const result = await this.usersService.atualizaRegiao(Number(user.user_id),regiao,filename)
     return result
   }
   
