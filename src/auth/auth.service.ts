@@ -8,6 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccessToken } from './entities/access-token.entity';
 import { Repository } from 'typeorm';
+import { GoogleSingupInput } from './dto/googleSingupGoogle';
 
 
 @Injectable()
@@ -54,6 +55,28 @@ export class AuthService {
     else throw new BadRequestException("papel de usuário inesistente.");
   }
 
+
+  async singupGoogle(input: GoogleSingupInput,profile:string) {
+    if(profile === "passenger" ) {
+      const newUser : any = input;
+      const passenger = await this.userService.createPassengerGoogle(newUser);
+      if(!passenger) throw new InternalServerErrorException("servidor falhou ")
+      return passenger
+      
+    }
+    // else if(profile === "driver" ) {
+    //   if(!loginUserInput.cnpj) throw new BadRequestException("É necessario informar o cnpj se cadastrar como motorista");
+    //   if(loginUserInput.cpf) throw new BadRequestException("Motoristas não possuem cpf");
+    //   newUser.cnpj = String(loginUserInput.cnpj).replace(/\D/g,'');
+    //   const driver = await this.userService.createDriver(newUser);
+    //   if(!driver) throw new InternalServerErrorException("servidor falhou ")
+    //   return driver
+      
+    // }
+    else throw new BadRequestException("papel de usuário inesistente.");
+  }
+
+
   async login(user:User){
     const {hashpassword,...userDTO} = user;
     const response ={
@@ -80,8 +103,8 @@ export class AuthService {
     return await this.login(user);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  findOne(email:string) {
+    return this.userService.findOne(email);
   }
 
   update(id: number, updateAuthDto: UpdateAuthDto) {

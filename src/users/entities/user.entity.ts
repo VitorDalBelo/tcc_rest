@@ -19,6 +19,8 @@ export class User {
     phone:string;
     @Column({name:'profile',length:255,nullable:false})
     profile:string;
+    @Column({name:'google_account'})
+    google_account:boolean;
     @OneToOne(() => AccessToken, accessToken => accessToken.user_id) 
     accessToken: AccessToken; 
     @OneToOne(() => Driver, driver => driver.user_id) 

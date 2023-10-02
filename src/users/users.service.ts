@@ -127,6 +127,45 @@ export class UsersService {
       await queryRunner.release();
     }
   }
+
+  async createPassengerGoogle(newPassenger : any) : Promise<GetPassengerDto> {
+    const userExits = await this.findOne(newPassenger.email);
+    if(userExits) throw new ConflictException("Existe outro usuário com este email");
+    const queryRunner = this.dataSource.createQueryRunner();
+    const {address} = newPassenger;
+    if(!address) throw new BadRequestException("É necessario informar o endereço do usuário.");
+    const addressValidation = await this.validateAddress(address);
+    if(!addressValidation.result) throw new BadRequestException(addressValidation.message);
+    let user = {
+      name:newPassenger.name,
+      email:newPassenger.email,
+      profile: "passenger",
+      phone: newPassenger.phone,
+      photo: newPassenger.photo,
+      google_account:newPassenger.google_account
+     }
+     await queryRunner.connect();
+     await queryRunner.startTransaction();
+     try{
+       const userEntity : User =  await this.userRepository.create(user);
+       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
+       const addressEntity : Address = await this.addressRepository.create(address as Address);
+       const addressInfo = await queryRunner.manager.save(addressEntity);
+       const passenger = {user_id:userInfo.user_id,address_id:addressInfo.id,campus_id:newPassenger.campus_id};
+       const passengerEntity =  await this.passengerRepository.create(passenger);
+       const passengerInfo = await queryRunner.manager.save(passengerEntity);
+       await queryRunner.commitTransaction();
+       return {...userInfo,...passengerInfo,address:addressInfo};
+ 
+     }catch(err){
+       console.log("transaction_error",err)
+       await queryRunner.rollbackTransaction();
+       throw new InternalServerErrorException("Tansação não processada")
+     }
+     finally{
+       await queryRunner.release();
+     }
+   }
   async createDriver(newDriver : CreateDriverDto) {
     const userExits = await this.findOne(newDriver.email)
     if(userExits) throw new ConflictException("Existe outro usuário com este email");

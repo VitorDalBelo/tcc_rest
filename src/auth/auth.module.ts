@@ -9,6 +9,7 @@ import { JwtAuthStrategy } from './strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'dotenv/config';
 import { AccessToken } from './entities/access-token.entity';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports:[UsersModule,PassportModule,JwtModule.register({
@@ -18,6 +19,6 @@ import { AccessToken } from './entities/access-token.entity';
   TypeOrmModule.forFeature([AccessToken])
 ],
   controllers: [AuthController],
-  providers: [AuthService,BasicAuthStrategy,JwtAuthStrategy]
+  providers: [AuthService,BasicAuthStrategy,JwtAuthStrategy,GoogleStrategy]
 })
 export class AuthModule {}
