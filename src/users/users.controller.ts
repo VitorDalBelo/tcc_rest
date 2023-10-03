@@ -50,7 +50,6 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FilesInterceptor("imagem"))
   async holdCoords( @Body() body: regiao , @Req() req : Request , @UploadedFile() file: Express.Multer.File){
-    console.log("oi")
     const regiao = JSON.parse(body.regiaoDeAtuacao)
     const user  = req.user as User;
 
