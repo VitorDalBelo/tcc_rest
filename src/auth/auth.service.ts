@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException , NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException , NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LoginUserInput } from './dto/login-user.input';
 import { UsersService } from 'src/users/users.service';
@@ -25,7 +25,8 @@ export class AuthService {
   async validadeUser(email:string,password:string):Promise<any> {
       const user = await this.userService.findOne(email);
       if(!user) return null;
-      const checkHash = await bcrypt.compare(password , user.hashpassword)
+      else if(!user.hashpassword && user.google_account) throw new UnauthorizedException("Esta conta foi criada com o google e não possui uma senha configurada .Utilize a opção Entrar com o google")
+      const checkHash = await bcrypt.compare(password , user.hashpassword).catch(e=> {throw new UnauthorizedException("Senha incorreta.")} )
       if(checkHash){
           const {hashpassword,...result} =user;
           return result;
