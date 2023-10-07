@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CampusesModule } from './campuses/campuses.module';
+import { TripModule } from './trip/trip.module';
 
 
 
@@ -25,6 +26,7 @@ import { CampusesModule } from './campuses/campuses.module';
     }),
     AuthModule,
     CampusesModule,
+    TripModule,
   ],
   controllers: [],
   providers: [],

@@ -6,9 +6,10 @@ import { User } from './entities/user.entity';
 import { Driver } from './entities/driver.entity';
 import { Passenger } from './entities/passenger.entity';
 import { Address } from './entities/address.entity';
+import { Van } from './entities/van.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User,Driver,Passenger,Address])],
+  imports:[TypeOrmModule.forFeature([User,Driver,Passenger,Address,Van])],
   controllers: [UsersController],
   providers: [UsersService],
   exports:[UsersService]

@@ -1,5 +1,6 @@
 
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
+import { Passenger } from "./passenger.entity";
 
 @Entity({ name: 'addresses' }) // Defina o nome da tabela
 export class Address {
@@ -32,4 +33,7 @@ export class Address {
 
   @Column({ name: 'uf', length: 2 })
   uf: string;
+
+  @OneToOne(() => Passenger, passager => passager.user_id) 
+  passager: Passenger; 
 }

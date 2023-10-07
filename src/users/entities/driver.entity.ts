@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Coords } from "src/communIntefaces";
+import { Van } from "./van.entity";
 
 @Entity({name:"drivers"})
 export class Driver {
@@ -18,4 +19,9 @@ export class Driver {
     @OneToOne(() => User) 
     @JoinColumn({ name: 'user_id' })
     user_id: number;
+
+    @OneToOne(() => Van) 
+    @JoinColumn({ name: 'van_id' })
+    van_id: number;
+
 }
