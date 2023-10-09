@@ -23,21 +23,25 @@ export class TripService {
   }
 
   async findOne(id: number) {
+
     return await this.tripRepository.findOne({ 
       where: { trip_id: id },
-      relations:['passengers', 'passengers.user','passengers.address'],
-      select:{passengers:{
-        user:{
-          user_id:true,
-          name:true,
-          email:false,
-          hashpassword:false,
-          photo:true,
-          phone:false,
-          profile:false,
-          google_account:false,
-        },
+      relations:['passengers.passenger', 'passengers.passenger.user','passengers.passenger.address'],
+      select:{
+        passengers:{
+        passenger:{
+          user:{
+            user_id:true,
+            name:true,
+            email:false,
+            hashpassword:false,
+            photo:true,
+            phone:false,
+            profile:false,
+            google_account:false,
+          },
       }},
+    },
       relationLoadStrategy:"query",
     });
   }
