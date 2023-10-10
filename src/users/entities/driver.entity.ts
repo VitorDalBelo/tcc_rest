@@ -19,9 +19,16 @@ export class Driver {
     @OneToOne(() => User) 
     @JoinColumn({ name: 'user_id' })
     user_id: number;
+    @OneToOne(() => User) 
+    @JoinColumn({ name: 'user_id' })
+    user: User;
+
 
     @OneToOne(() => Van) 
     @JoinColumn({ name: 'van_id' })
     van_id: number;
+    @OneToOne(() => Van) 
+    @JoinColumn({ name: 'van_id' })
+    van: Van;
 
 }

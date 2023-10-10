@@ -26,6 +26,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('/passenger/trips')
+  @UseGuards(AuthGuard('jwt'))
+  async getTrips(@Req() req : Request){
+    const user = req.user as User;
+    return await this.usersService.getTrips(Number(user.user_id))
+  }
+
   @Get('/drivers/me')
   @UseGuards(AuthGuard('jwt'))
   async getMeDriver(@Req() req : Request){

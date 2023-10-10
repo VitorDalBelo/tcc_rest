@@ -26,6 +26,7 @@ const   addressSchema  = Yup.object({
 
 @Injectable()
 export class UsersService {
+
   constructor(
     @InjectRepository(Driver)
     private readonly driverRepository : Repository<Driver>,
@@ -39,6 +40,38 @@ export class UsersService {
     private dataSource: DataSource,
   ){}
 
+  async getTrips(user_id: number) {
+    return await this.passengerRepository.findOne(
+      {
+        where:{user_id},
+        relations:['trips','trips.trip','trips.trip.driver','trips.trip.driver.user',"trips.trip.driver.van"],
+        select:{
+          trips:{
+            trip:{
+              driver:{
+                driver_id: true,
+                cnpj: false,
+                mapaPreview: false,
+                descricao: false,
+                regiaoDeAtuacao: false,
+                user:{
+                  user_id:true,
+                  name:true,
+                  email:false,
+                  hashpassword:false,
+                  photo:true,
+                  phone:false,
+                  profile:false,
+                  google_account:false,
+                }
+              }
+            }
+          }
+        },
+        relationLoadStrategy:"query"
+      },
+      )
+  }
 
   async getDriversForPassenger(){
     return await this.dataSource.createQueryBuilder()

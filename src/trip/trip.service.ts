@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
 import { Trip } from './entities/trip.entity';
-import { Repository } from 'typeorm';
+import { Repository ,DataSource} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Passenger } from 'src/users/entities/passenger.entity';
 import { NEVER } from 'rxjs';
+import { query } from 'express';
 
 @Injectable()
 export class TripService {
@@ -13,6 +14,8 @@ export class TripService {
   constructor(
     @InjectRepository(Trip)
     private readonly tripRepository : Repository<Trip>,
+
+    private dataSource: DataSource,
   ){}
   create(createTripDto: CreateTripDto) {
     return 'This action adds a new trip';
@@ -23,9 +26,22 @@ export class TripService {
   }
 
   async findOne(id: number) {
+    const absences = await this.dataSource.query(`
+    SELECT string_agg(CAST(a.passenger_id AS TEXT), ',') AS passenger_ids
+    FROM absences a
+    WHERE a.absence_date = '2023-10-10' AND a.trip_id = ${id};
+    `)
+    .then(resp =>resp[0]["passenger_ids"].split(","))
+    .catch(e=>{
+      console.log(e);
+      return[]
+    })
+
 
     return await this.tripRepository.findOne({ 
-      where: { trip_id: id , passengers:{passenger:{passenger_id:2}} },
+      where: {
+        trip_id: id,
+      },
       relations:['passengers.passenger', 'passengers.passenger.user','passengers.passenger.address'],
       select:{
         passengers:{
@@ -43,7 +59,8 @@ export class TripService {
       }},
     },
       relationLoadStrategy:"query",
-    });
+    }).then(query=>({...query,absences:absences}))
+    
   }
   
   update(id: number, updateTripDto: UpdateTripDto) {

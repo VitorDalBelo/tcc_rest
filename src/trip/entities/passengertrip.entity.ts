@@ -15,9 +15,12 @@ export class PassengerTrip {
     @JoinColumn({ name: 'tripid' }) // Especifique o nome da coluna na tabela Passenger que faz a referência à coluna trip_id na tabela Trip
     trip: Trip;
 
-    @ManyToOne(() => Passenger, passenger => passenger.passengertrip)
+    @ManyToOne(() => Passenger, passenger => passenger.trips)
     @JoinColumn({ name: 'passengerid' }) // Especifique o nome da coluna na tabela Passenger que faz a referência à coluna trip_id na tabela Trip
     passenger: Passenger;
+
+    @Column({name:'passengerid'})
+    passengerid: number;
     
 
 }

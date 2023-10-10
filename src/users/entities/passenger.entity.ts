@@ -28,6 +28,6 @@ export class Passenger {
     campus: Campus; 
     @OneToMany(() => PassengerTrip, passengertrip => passengertrip.passenger)
     @JoinColumn({ name: 'passengerid' }) // Especifique o nome da coluna na tabela Passenger que faz a referência à coluna trip_id na tabela Trip
-    passengertrip: PassengerTrip[];
+    trips: PassengerTrip[];
     
 }

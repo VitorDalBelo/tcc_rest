@@ -12,11 +12,10 @@ export class Trip {
     @Column({name:'name',length:255,nullable:false})
     name:string;
     @OneToOne(() => Driver, driver => driver.driver_id) 
+    @JoinColumn({ name: 'driver_id' })
     driver: Driver; 
 
     @OneToMany(() => PassengerTrip, passengertrip => passengertrip.trip)
     @JoinColumn({ name: 'tripid' }) // Especifique o nome da coluna na tabela Passenger que faz a referência à coluna trip_id na tabela Trip
     passengers: PassengerTrip[];
-    
-
 }
