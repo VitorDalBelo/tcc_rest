@@ -25,7 +25,7 @@ export class TripService {
   async findOne(id: number) {
 
     return await this.tripRepository.findOne({ 
-      where: { trip_id: id },
+      where: { trip_id: id , passengers:{passenger:{passenger_id:2}} },
       relations:['passengers.passenger', 'passengers.passenger.user','passengers.passenger.address'],
       select:{
         passengers:{
