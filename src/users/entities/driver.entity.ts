@@ -1,7 +1,9 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Coords } from "src/communIntefaces";
 import { Van } from "./van.entity";
+import { PassengerTrip } from "src/trip/entities/passengertrip.entity";
+import { Trip } from "src/trip/entities/trip.entity";
 
 @Entity({name:"drivers"})
 export class Driver {
@@ -23,7 +25,9 @@ export class Driver {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-
+    @OneToMany(() =>Trip,trip =>trip.driver)
+    trips: Trip[];
+    
     @OneToOne(() => Van) 
     @JoinColumn({ name: 'van_id' })
     van_id: number;

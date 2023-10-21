@@ -1,9 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards,Req, ForbiddenException , UseInterceptors, UploadedFile} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Coords } from 'src/communIntefaces';
 import { Request } from 'express';
 import { User } from './entities/user.entity';
 import { Buffer } from 'buffer';
@@ -26,11 +24,12 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get('/passenger/trips')
+  @Get('/trips')
   @UseGuards(AuthGuard('jwt'))
   async getTrips(@Req() req : Request){
     const user = req.user as User;
-    return await this.usersService.getTrips(Number(user.user_id))
+    if(user.profile=="driver") return await this.usersService.getDriverTrips(Number(user.user_id));
+    return await this.usersService.getPassengerTrips(Number(user.user_id))
   }
 
   @Get('/drivers/me')

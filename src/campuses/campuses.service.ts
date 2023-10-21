@@ -16,10 +16,11 @@ export class CampusesService {
   }
 
   async findAll() {
-    return await this.campusesRepository
-    .createQueryBuilder("campuses")
-    .select(["campuses.id","campuses.campus"])
-    .getMany();
+    return await this.campusesRepository.find(
+      {
+        relations:['address_id']
+      }
+    )
   }
 
   findOne(id: number) {

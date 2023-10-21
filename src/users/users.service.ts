@@ -40,7 +40,7 @@ export class UsersService {
     private dataSource: DataSource,
   ){}
 
-  async getTrips(user_id: number) {
+  async getPassengerTrips(user_id: number) {
     return await this.passengerRepository.findOne(
       {
         where:{user_id},
@@ -72,6 +72,32 @@ export class UsersService {
       },
       )
   }
+
+  async getDriverTrips(user_id: number) {
+    const driver : any = await this.driverRepository.findOne(
+      {
+        where: { user_id },
+        relations: ['trips']
+      }
+    );
+  
+    // Verifica se o motorista foi encontrado
+    if (!driver) {
+      return null; // Ou lance uma exceção se for o caso
+    }
+  
+    // Mapeia os objetos 'trips' para incluir a propriedade 'trip'
+    const tripsWithTripProperty = driver.trips.map((trip) => ({
+      trip: trip // Ou seja, você está aninhando 'trip' dentro de um objeto 'trip'
+    }));
+  
+    // Atualiza o objeto driver para incluir a nova propriedade 'trips'
+    driver.trips = tripsWithTripProperty;
+  
+    return driver;
+  }
+
+
 
   async getDriversForPassenger(){
     return await this.dataSource.createQueryBuilder()
@@ -121,7 +147,9 @@ export class UsersService {
             })
   }
 
-
+ async getPassenger(user_id:number){
+  return await this.passengerRepository.findOne({where:{user_id}})
+ }
 
   async createPassenger(newPassenger : CreatePassengerDto) : Promise<GetPassengerDto> {
    const userExits = await this.findOne(newPassenger.email);

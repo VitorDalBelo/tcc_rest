@@ -10,11 +10,15 @@ export class Migrations1691949809396 implements MigrationInterface {
                 absence_date DATE NOT NULL,
                 go boolean DEFAULT true,
                 back boolean DEFAULT true,
-                trip_id INT,
-                passenger_id INT,
-                FOREIGN KEY (trip_id) REFERENCES trips(trip_id),
-                FOREIGN KEY (passenger_id) REFERENCES passengers(passenger_id)
+                tripid INT,
+                passengerid INT,
+                FOREIGN KEY (tripid) REFERENCES trips(trip_id)
             );
+
+            ALTER TABLE absences
+            ADD CONSTRAINT fk_passengers_absences
+            FOREIGN KEY (passengerid)
+            REFERENCES passengers(passenger_id);
             
             `
             )
@@ -23,7 +27,10 @@ export class Migrations1691949809396 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(
             `
-            DROP TABLE absence;
+            ALTER TABLE absences
+            DROP CONSTRAINT fk_passengers_absences;
+
+            DROP TABLE absences;
 
             `
             );
