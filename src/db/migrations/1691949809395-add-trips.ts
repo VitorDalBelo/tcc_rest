@@ -12,7 +12,6 @@ export class Migrations1691949809395 implements MigrationInterface {
                 FOREIGN KEY (driver_id) REFERENCES drivers(driver_id)
             );
             ALTER TABLE passengers
-            ADD COLUMN trip_id INT REFERENCES trips(trip_id);
                         
             `
             )
@@ -21,7 +20,6 @@ export class Migrations1691949809395 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(
             `
-                ALTER TABLE passengers DROP COLUMN trip_id;
                 DROP TABLE trips;
             `
             );

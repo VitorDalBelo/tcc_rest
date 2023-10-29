@@ -26,6 +26,7 @@ const   addressSchema  = Yup.object({
 
 @Injectable()
 export class UsersService {
+
   constructor(
     @InjectRepository(Driver)
     private readonly driverRepository : Repository<Driver>,
@@ -39,14 +40,84 @@ export class UsersService {
     private dataSource: DataSource,
   ){}
 
-
-  async getDriversForPassenger(){
-    return await this.dataSource.createQueryBuilder()
-    .select(['driver.mapapreview', 'driver.descricao', 'user.photo'])
-    .innerJoin('driver.user', 'user', 'user.user_id = driver.user_id')
-    .getMany()
-
+  async getPassengerTrips(user_id: number) {
+    return await this.passengerRepository.findOne(
+      {
+        where:{user_id},
+        relations:['trips','trips.trip','trips.trip.driver','trips.trip.driver.user',"trips.trip.driver.van"],
+        select:{
+          trips:{
+            trip:{
+              driver:{
+                driver_id: true,
+                cnpj: false,
+                mapaPreview: false,
+                descricao: false,
+                regiaoDeAtuacao: false,
+                user:{
+                  user_id:true,
+                  name:true,
+                  email:false,
+                  hashpassword:false,
+                  photo:true,
+                  phone:false,
+                  profile:false,
+                  google_account:false,
+                }
+              }
+            }
+          }
+        },
+        relationLoadStrategy:"query"
+      },
+      )
   }
+
+  async getDriverTrips(user_id: number) {
+    const driver : any = await this.driverRepository.findOne(
+      {
+        where: { user_id },
+        relations: ['trips']
+      }
+    );
+  
+    // Verifica se o motorista foi encontrado
+    if (!driver) {
+      return null; // Ou lance uma exceção se for o caso
+    }
+  
+    // Mapeia os objetos 'trips' para incluir a propriedade 'trip'
+    const tripsWithTripProperty = driver.trips.map((trip) => ({
+      trip: trip // Ou seja, você está aninhando 'trip' dentro de um objeto 'trip'
+    }));
+  
+    // Atualiza o objeto driver para incluir a nova propriedade 'trips'
+    driver.trips = tripsWithTripProperty;
+  
+    return driver;
+  }
+
+
+
+  async getDriversForPassenger(name?:string) {
+    const query =  this.dataSource.createQueryBuilder()
+      .select([
+        'd.descricao as description',
+        'u.google_account as google_account', 
+        'u.photo as photo',
+        'u.name as name',
+        'v.license_plate as license_plate',
+        'v.model as van_model'
+      ])
+      .from(Driver, 'd')  
+      .innerJoin(User, 'u', 'u.user_id = d.user_id')  
+      .innerJoin("vans", 'v', 'd.van_id = v.van_id')  
+
+      console.log("query",query)
+
+      return name ? query.where(`u.name ILIKE '%${name}%'`).execute() : query.execute()
+  }
+  
 
   async getUserDriverInfo(user_id:number):Promise<any>{
       const {user_id:user,...driver} = await this.driverRepository.findOne({where:{user_id},relations:["user_id"],relationLoadStrategy:"query"})
@@ -88,7 +159,9 @@ export class UsersService {
             })
   }
 
-
+ async getPassenger(user_id:number){
+  return await this.passengerRepository.findOne({where:{user_id}})
+ }
 
   async createPassenger(newPassenger : CreatePassengerDto) : Promise<GetPassengerDto> {
    const userExits = await this.findOne(newPassenger.email);

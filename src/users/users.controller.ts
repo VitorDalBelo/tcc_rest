@@ -1,9 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards,Req, ForbiddenException , UseInterceptors, UploadedFile} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Coords } from 'src/communIntefaces';
 import { Request } from 'express';
 import { User } from './entities/user.entity';
 import { Buffer } from 'buffer';
@@ -26,6 +24,14 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('/trips')
+  @UseGuards(AuthGuard('jwt'))
+  async getTrips(@Req() req : Request){
+    const user = req.user as User;
+    if(user.profile=="driver") return await this.usersService.getDriverTrips(Number(user.user_id));
+    return await this.usersService.getPassengerTrips(Number(user.user_id))
+  }
+
   @Get('/drivers/me')
   @UseGuards(AuthGuard('jwt'))
   async getMeDriver(@Req() req : Request){
@@ -38,7 +44,7 @@ export class UsersController {
   async searchDriver(@Req() req : Request){
     const user = req.user as User;
     if(user.profile !== "passenger") throw new ForbiddenException("apenas passageiros tem acesso a pesquisa de motoristas");
-    return await this.usersService.getDriversForPassenger()    
+    return await this.usersService.getDriversForPassenger(req.query.name?String(req.query.name):undefined)    
   }
   // @Get(':id')
   // findOne(@Param('id') id: string) {
