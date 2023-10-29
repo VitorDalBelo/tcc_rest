@@ -44,7 +44,7 @@ export class UsersController {
   async searchDriver(@Req() req : Request){
     const user = req.user as User;
     if(user.profile !== "passenger") throw new ForbiddenException("apenas passageiros tem acesso a pesquisa de motoristas");
-    return await this.usersService.getDriversForPassenger()    
+    return await this.usersService.getDriversForPassenger(req.query.name?String(req.query.name):undefined)    
   }
   // @Get(':id')
   // findOne(@Param('id') id: string) {

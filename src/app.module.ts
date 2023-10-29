@@ -8,6 +8,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CampusesModule } from './campuses/campuses.module';
 import { TripModule } from './trip/trip.module';
+import { WebsocketGateway } from './websocket/websocket.gateway';
 
 
 
@@ -29,6 +30,6 @@ import { TripModule } from './trip/trip.module';
     TripModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [WebsocketGateway],
 })
 export class AppModule {}

@@ -39,8 +39,20 @@ export class TripController {
     return this.tripService.findAll();
   }
   @Get(':id/route')
-  async getRoute(@Param('id') id: string){
+  @UseGuards(AuthGuard("jwt"))
+  async getRoute(@Param('id') id: string,@Req() req : Request){
+    const user = req.user as User;
+    if(user.profile == "passenger"){
+      const userAbsences = await this.tripService.getPassengerAbsence(Number(id),user.user_id);
+      const trip = await this.tripService.getRoute(Number(id));
+      return {...trip,userAbsences}
+    }
     return await this.tripService.getRoute(Number(id))
+  }
+
+  @Get(':id/status')
+  async getTripStatus(@Param('id') id: string){
+    return {status:this.tripService.isGoing(Number(id))}
   }
 
   @Get(':id')

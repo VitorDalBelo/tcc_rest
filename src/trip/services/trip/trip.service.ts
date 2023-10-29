@@ -87,13 +87,24 @@ function PilhaComRemocao() {
   };
 }
 
+const getDate =()=>{
+  const data = new Date();
+  const ano = data.getFullYear();
+  const mes = (data.getMonth() + 1).toString().padStart(2, '0'); // O mês é baseado em zero, por isso é necessário adicionar 1.
+  const dia = data.getDate().toString().padStart(2, '0');
+
+  return `${ano}-${mes}-${dia}`;
+}
 
 @Injectable()
 export class TripService {
-
+  private static trips = new Map<number,object>();
   constructor(
     @InjectRepository(Trip)
     private readonly tripRepository : Repository<Trip>,
+    
+    @InjectRepository(Absence)
+    private readonly absenceRepository : Repository<Absence>,
 
     private dataSource: DataSource,
 
@@ -107,13 +118,21 @@ export class TripService {
     return `This action returns all trip`;
   }
 
-  async getRoute(trip:number){
+  isGoing(trip:number){
+    return TripService.trips.has(trip);
+  }
+
+  async startTrip (trip:number,coords:{latitude:number,longitude:number}) {
+     const route = await this.getGoRoute(trip,coords);
+     TripService.trips.set(trip,route);
+     return route;
+  }
+  async getGoRoute(trip:number,coords:{latitude:number,longitude:number}){
     const passagenrs = await this.findOne(trip);
     const campuses = await this.campusService.findAll();
-  
-  // Coordenadas do ponto de referência
-  const referenceLatitude = -23.6246797;
-  const referenceLongitude = -46.5476174;
+
+  const referenceLatitude = coords.latitude;
+  const referenceLongitude = coords.longitude;
   const origin = {
     "location":{
       "latLng":{
@@ -198,6 +217,100 @@ export class TripService {
   
   // Agora a lista de passageiros está ordenada pela distância em relação ao ponto de referência e no formato desejado
    return {markers:markers,polyline};
+
+
+  }
+  async getRoute(trip:number){
+    const passagenrs = await this.findOne(trip);
+    const campuses = await this.campusService.findAll();
+    const absences = await Absence.getTripAbsence(this.dataSource,getDate(),trip);
+
+  const referenceLatitude = passagenrs.passengers[0].passenger.address.latitude;
+  const referenceLongitude = passagenrs.passengers[0].passenger.address.longitude;
+  const origin = {
+    "location":{
+      "latLng":{
+        "latitude": referenceLatitude,
+        "longitude": referenceLongitude
+      }
+    }
+  }
+  
+  // Ordenar e formatar a lista de passageiros sem filtragem
+  passagenrs.passengers.sort((passengerA, passengerB) => {
+      const latitudeA = passengerA.passenger.address.latitude;
+      const longitudeA = passengerA.passenger.address.longitude;
+  
+      const latitudeB = passengerB.passenger.address.latitude;
+      const longitudeB = passengerB.passenger.address.longitude;
+  
+      const distanceA = calculateDistance(referenceLatitude, referenceLongitude, latitudeA, longitudeA);
+      const distanceB = calculateDistance(referenceLatitude, referenceLongitude, latitudeB, longitudeB);
+  
+      return distanceA - distanceB;
+  });
+  
+  // Formatar a lista no formato especificado
+  const markers = [];
+  const pilha = new PilhaComRemocao();
+  const campusIndex = {};
+  const formattedPassengers = passagenrs.passengers
+      .filter(passenger => !passagenrs.absences.includes(String(passenger.passengerid)))
+      .map((passenger,index) => {
+      const latitude = passenger.passenger.address.latitude;
+      const longitude = passenger.passenger.address.longitude;
+      const campus = campuses.find(campus => campus.id === passenger.passenger.campus_id);
+      pilha.push(campus.campus)
+      campusIndex[campus.campus]={lastpassenger:index,address:campus.address_id}
+      markers.push(
+          {
+          type:"passenger",
+          location: {
+              latLng: {
+                  latitude: latitude,
+                  longitude: longitude
+              }
+          }
+      }
+      );
+      
+      return {
+          location: {
+              latLng: {
+                  latitude: latitude,
+                  longitude: longitude
+              }
+          }
+      };
+  });
+  
+  Object.values(campusIndex).map(()=>{
+      const item = campusIndex[pilha.pop()];
+      markers.splice(item.lastpassenger+1, 0, {
+          type:"campus",
+          location: {
+              latLng: {
+                  latitude: item.address.latitude,
+                  longitude: item.address.longitude
+              }
+          }
+      });
+      formattedPassengers.splice(item.lastpassenger+1, 0, {
+          location: {
+              latLng: {
+                  latitude: item.address.latitude,
+                  longitude: item.address.longitude
+              }
+          }
+      });
+  })
+
+  const destination = formattedPassengers.pop();
+
+  const polyline = await getPolyline(origin,destination,formattedPassengers)
+  
+  // Agora a lista de passageiros está ordenada pela distância em relação ao ponto de referência e no formato desejado
+   return {markers:markers,polyline,absences};
 
 
   }

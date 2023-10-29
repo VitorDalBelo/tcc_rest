@@ -99,13 +99,25 @@ export class UsersService {
 
 
 
-  async getDriversForPassenger(){
-    return await this.dataSource.createQueryBuilder()
-    .select(['driver.mapapreview', 'driver.descricao', 'user.photo'])
-    .innerJoin('driver.user', 'user', 'user.user_id = driver.user_id')
-    .getMany()
+  async getDriversForPassenger(name?:string) {
+    const query =  this.dataSource.createQueryBuilder()
+      .select([
+        'd.descricao as description',
+        'u.google_account as google_account', 
+        'u.photo as photo',
+        'u.name as name',
+        'v.license_plate as license_plate',
+        'v.model as van_model'
+      ])
+      .from(Driver, 'd')  
+      .innerJoin(User, 'u', 'u.user_id = d.user_id')  
+      .innerJoin("vans", 'v', 'd.van_id = v.van_id')  
 
+      console.log("query",query)
+
+      return name ? query.where(`u.name ILIKE '%${name}%'`).execute() : query.execute()
   }
+  
 
   async getUserDriverInfo(user_id:number):Promise<any>{
       const {user_id:user,...driver} = await this.driverRepository.findOne({where:{user_id},relations:["user_id"],relationLoadStrategy:"query"})

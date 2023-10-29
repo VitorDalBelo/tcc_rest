@@ -11,6 +11,7 @@ import { CampusesModule } from 'src/campuses/campuses.module';
 @Module({
   imports:[TypeOrmModule.forFeature([Trip,Absence]),UsersModule,CampusesModule],
   controllers: [TripController],
-  providers: [TripService, AbsenceService, ]
+  providers: [TripService, AbsenceService, ],
+  exports:[TripService]
 })
 export class TripModule {}
