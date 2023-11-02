@@ -160,7 +160,7 @@ export class TripService {
   const markers = [];
   const pilha = new PilhaComRemocao();
   const campusIndex = {};
-  const formattedPassengers = passagenrs.passengers
+  const route = passagenrs.passengers
       .filter(passenger => !passagenrs.absences.includes(String(passenger.passengerid)))
       .map((passenger,index) => {
       const latitude = passenger.passenger.address.latitude;
@@ -201,7 +201,7 @@ export class TripService {
               }
           }
       });
-      formattedPassengers.splice(item.lastpassenger+1, 0, {
+      route.splice(item.lastpassenger+1, 0, {
           location: {
               latLng: {
                   latitude: item.address.latitude,
@@ -211,9 +211,9 @@ export class TripService {
       });
   })
 
-  const destination = formattedPassengers.pop();
+  const destination = route.pop();
 
-  const polyline = await getPolyline(origin,destination,formattedPassengers)
+  const polyline = await getPolyline(origin,destination,route)
   
   // Agora a lista de passageiros está ordenada pela distância em relação ao ponto de referência e no formato desejado
    return {markers:markers,polyline};
@@ -254,14 +254,33 @@ export class TripService {
   const markers = [];
   const pilha = new PilhaComRemocao();
   const campusIndex = {};
-  const formattedPassengers = passagenrs.passengers
+  const route = passagenrs.passengers
       .filter(passenger => !passagenrs.absences.includes(String(passenger.passengerid)))
       .map((passenger,index) => {
       const latitude = passenger.passenger.address.latitude;
       const longitude = passenger.passenger.address.longitude;
       const campus = campuses.find(campus => campus.id === passenger.passenger.campus_id);
       pilha.push(campus.campus)
-      campusIndex[campus.campus]={lastpassenger:index,address:campus.address_id}
+      campusIndex[campus.campus]={
+        lastpassenger:index,
+        address:campus.address_id , 
+        extraInfo:{
+          name:campus.campus,
+          //@ts-ignore
+          bairro:campus.address_id.bairro,
+          //@ts-ignore
+          cidade:campus.address_id.cidade,
+          //@ts-ignore
+          complemento:campus.address_id.complemento,
+          //@ts-ignore
+          logradouro:campus.address_id.logradouro,
+          //@ts-ignore
+          pais:campus.address_id.pais,
+          //@ts-ignore
+          uf:campus.address_id.uf,
+          //@ts-ignore
+          numero:campus.address_id.numero,
+        }}
       markers.push(
           {
           type:"passenger",
@@ -270,6 +289,18 @@ export class TripService {
                   latitude: latitude,
                   longitude: longitude
               }
+          },
+          extraInfo:{
+            name:passenger.passenger.user.name,
+            photo: passenger.passenger.user.photo,
+            google_account:passenger.passenger.user.google_account,
+            bairro:passenger.passenger.address.bairro,
+            cidade:passenger.passenger.address.cidade,
+            complemento:passenger.passenger.address.complemento,
+            logradouro:passenger.passenger.address.logradouro,
+            pais:passenger.passenger.address.pais,
+            uf:passenger.passenger.address.uf,
+            numero:passenger.passenger.address.numero
           }
       }
       );
@@ -293,9 +324,10 @@ export class TripService {
                   latitude: item.address.latitude,
                   longitude: item.address.longitude
               }
-          }
+          },
+          extraInfo:item.extraInfo
       });
-      formattedPassengers.splice(item.lastpassenger+1, 0, {
+      route.splice(item.lastpassenger+1, 0, {
           location: {
               latLng: {
                   latitude: item.address.latitude,
@@ -305,9 +337,9 @@ export class TripService {
       });
   })
 
-  const destination = formattedPassengers.pop();
+  const destination = route.pop();
 
-  const polyline = await getPolyline(origin,destination,formattedPassengers)
+  const polyline = await getPolyline(origin,destination,route)
   
   // Agora a lista de passageiros está ordenada pela distância em relação ao ponto de referência e no formato desejado
    return {markers:markers,polyline,absences};

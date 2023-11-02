@@ -46,10 +46,15 @@ export class UsersController {
     if(user.profile !== "passenger") throw new ForbiddenException("apenas passageiros tem acesso a pesquisa de motoristas");
     return await this.usersService.getDriversForPassenger(req.query.name?String(req.query.name):undefined)    
   }
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(Number(id));
-  // }
+
+  @Get('/passenger/search')
+  @UseGuards(AuthGuard('jwt'))
+  async searchPassenger(@Req() req : Request){
+    const user = req.user as User;
+    return await this.usersService.getSearchPassenger(req.query.name?String(req.query.name):undefined)    
+  }
+
+
 
 
   @Post('/drivers/area')

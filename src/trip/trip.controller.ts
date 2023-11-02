@@ -19,7 +19,6 @@ import { Request } from 'express';
 import { CreateAbsenceDto } from './dto/create-absence.dto';
 import { AbsenceService } from './services/absence/absence.service';
 import { UsersService } from 'src/users/users.service';
-import { NotFoundError } from 'rxjs';
 
 @Controller('trip')
 export class TripController {
@@ -77,13 +76,4 @@ export class TripController {
   }
 
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
-    return this.tripService.update(+id, updateTripDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tripService.remove(+id);
-  }
 }
