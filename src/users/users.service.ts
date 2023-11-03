@@ -111,7 +111,7 @@ export class UsersService {
       ])
       .from(Driver, 'd')  
       .innerJoin(User, 'u', 'u.user_id = d.user_id')  
-      .innerJoin("vans", 'v', 'd.van_id = v.van_id')  
+      .leftJoin("vans", 'v', 'd.van_id = v.van_id')  
 
       console.log("query",query)
 
