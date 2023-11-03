@@ -58,22 +58,20 @@ export class AuthService {
 
 
   async singupGoogle(input: GoogleSingupInput,profile:string) {
+    const newUser : any = input;
     if(profile === "passenger" ) {
-      const newUser : any = input;
       const passenger = await this.userService.createPassengerGoogle(newUser);
       if(!passenger) throw new InternalServerErrorException("servidor falhou ")
       return passenger
       
     }
-    // else if(profile === "driver" ) {
-    //   if(!loginUserInput.cnpj) throw new BadRequestException("É necessario informar o cnpj se cadastrar como motorista");
-    //   if(loginUserInput.cpf) throw new BadRequestException("Motoristas não possuem cpf");
-    //   newUser.cnpj = String(loginUserInput.cnpj).replace(/\D/g,'');
-    //   const driver = await this.userService.createDriver(newUser);
-    //   if(!driver) throw new InternalServerErrorException("servidor falhou ")
-    //   return driver
+    else if(profile === "driver" ) {
+      if(!input.cnpj) throw new BadRequestException("É necessario informar o cnpj se cadastrar como motorista");
+      const driver = await this.userService.createDriverGoogle(newUser);
+      if(!driver) throw new InternalServerErrorException("servidor falhou ")
+      return driver
       
-    // }
+    }
     else throw new BadRequestException("papel de usuário inesistente.");
   }
 

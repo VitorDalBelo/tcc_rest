@@ -3,4 +3,5 @@ export class GoogleSingupInput{
     email: string;
     photo: string;
     google_account:boolean;
+    cnpj?:string
 }

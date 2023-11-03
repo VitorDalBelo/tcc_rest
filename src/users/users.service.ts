@@ -254,6 +254,39 @@ export class UsersService {
        await queryRunner.release();
      }
    }
+
+   async createDriverGoogle(newDriver : any) {
+    const userExits = await this.findOne(newDriver.email)
+    if(userExits) throw new ConflictException("Existe outro usuário com este email");
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    const {cnpj} = newDriver;
+    let user = {
+      name:newDriver.name,
+      email:newDriver.email,
+      profile: "driver",
+      phone: newDriver.phone,
+      photo: newDriver.photo,
+      google_account:newDriver.google_account
+     };
+    try{
+      const userEntity : User =  await this.userRepository.create(user);
+      const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
+      const passenger = {cnpj:cnpj,user_id:userInfo.user_id};
+      const driverEntity =  await this.driverRepository.create(passenger);
+      const {regiaoDeAtuacao,...driverInfo} = await queryRunner.manager.save(driverEntity);
+      await queryRunner.commitTransaction();
+      return {...userInfo,...driverInfo };
+    }catch(err){
+      console.log("transaction_error",err)
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException("Tansação não processada")
+    }
+    finally{
+      await queryRunner.release();
+    }
+  }
   async createDriver(newDriver : CreateDriverDto) {
     const userExits = await this.findOne(newDriver.email)
     if(userExits) throw new ConflictException("Existe outro usuário com este email");

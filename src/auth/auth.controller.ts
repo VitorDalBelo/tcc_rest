@@ -41,7 +41,7 @@ export class AuthController {
       newUser.photo = String(resp.data.picture).split("\\u")[0];
       newUser.google_account=true;
     })
-    .catch(e=> {throw new UnauthorizedException("Usuário autorizado")})
+    .catch(e=> {throw new UnauthorizedException("Usuário não autorizado")})
     return this.authService.singupGoogle({...newUser,...loginUserInput},profile);
   }
 
