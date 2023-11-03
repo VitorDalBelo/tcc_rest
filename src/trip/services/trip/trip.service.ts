@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Absence } from '../../entities/absence.entity';
 import { CampusesService } from 'src/campuses/campuses.service';
 import axios from "axios"
+import { PassengerTrip } from 'src/trip/entities/passengertrip.entity';
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const radlat1 = (Math.PI * lat1) / 180;
@@ -110,13 +111,7 @@ export class TripService {
 
     private readonly campusService : CampusesService
   ){}
-  create(createTripDto: CreateTripDto) {
-    return 'This action adds a new trip';
-  }
 
-  findAll() {
-    return `This action returns all trip`;
-  }
 
   isGoing(trip:number){
     return TripService.trips.has(trip);
@@ -393,11 +388,18 @@ export class TripService {
     
   }
   
-  update(id: number, updateTripDto: UpdateTripDto) {
-    return `This action updates a #${id} trip`;
-  }
+//   async create ( name :string , driver_id:number ,passagenrs?: {passengerid:number}[]){
+//       const tripQuery = this.tripRepository.create({name,driver:{driver_id}});
+//       const trip = await this.tripRepository.save(tripQuery)
+//       if(passagenrs){
+//         const a : PassengerTrip[] = passagenrs.map(item => {return{
+//           passenger_trip_id:null,
+//           trip,
+//           passenger:{passenger_id:1},
+//           passengerid:1
+//         }}) as PassengerTrip
+//         trip.passengers =  a
+//       }
 
-  remove(id: number) {
-    return `This action removes a #${id} trip`;
-  }
-}
+//   }
+ }
