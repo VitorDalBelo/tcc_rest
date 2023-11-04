@@ -29,14 +29,14 @@ export class TripController {
   ) {}
 
   @Post()
-  create(@Body() createTripDto: CreateTripDto) {
-    return this.tripService.create(createTripDto);
+  @UseGuards(AuthGuard("jwt"))
+  async create(@Body() createTripDto: {name:string,passengers?: { passengerid: number }[]},@Req() req : Request) {
+    const user = req.user as User;
+    return createTripDto.passengers ? 
+     await this.tripService.create(createTripDto.name,user.user_id,createTripDto.passengers) : 
+     await this.tripService.create(createTripDto.name,user.user_id);
   }
 
-  @Get()
-  findAll() {
-    return this.tripService.findAll();
-  }
   @Get(':id/route')
   @UseGuards(AuthGuard("jwt"))
   async getRoute(@Param('id') id: string,@Req() req : Request){
