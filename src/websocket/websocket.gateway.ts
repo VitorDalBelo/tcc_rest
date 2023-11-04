@@ -16,7 +16,7 @@ export class WebsocketGateway implements OnModuleInit {
 
   onModuleInit() {
     this.server.on('connection',(socket)=>{
-      console.log("socket.id", this.tripService.findAll());
+      console.log("socket.id");
     })
   }
   @SubscribeMessage('message')

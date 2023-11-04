@@ -2,11 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateTripDto } from '../../dto/create-trip.dto';
 import { UpdateTripDto } from '../../dto/update-trip.dto';
 import { Trip } from '../../entities/trip.entity';
-import { Repository ,DataSource} from 'typeorm';
+import { Repository ,DataSource, DeepPartial} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Absence } from '../../entities/absence.entity';
 import { CampusesService } from 'src/campuses/campuses.service';
 import axios from "axios"
+import { PassengerTrip } from 'src/trip/entities/passengertrip.entity';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const radlat1 = (Math.PI * lat1) / 180;
@@ -106,17 +109,15 @@ export class TripService {
     @InjectRepository(Absence)
     private readonly absenceRepository : Repository<Absence>,
 
+    
+   
+    private readonly userService : UsersService,
+
     private dataSource: DataSource,
 
     private readonly campusService : CampusesService
   ){}
-  create(createTripDto: CreateTripDto) {
-    return 'This action adds a new trip';
-  }
 
-  findAll() {
-    return `This action returns all trip`;
-  }
 
   isGoing(trip:number){
     return TripService.trips.has(trip);
@@ -393,11 +394,35 @@ export class TripService {
     
   }
   
-  update(id: number, updateTripDto: UpdateTripDto) {
-    return `This action updates a #${id} trip`;
-  }
+  async create(name: string, user_id: number, passengers?: { passengerid: number }[]) {
+    const {driver} = await this.userService.getUserDriverInfo(user_id)
+    const tripQuery = this.tripRepository.create({ name, driver: { driver_id :  driver.driver_id } });
+    const trip = await this.tripRepository.save(tripQuery);
+  
+    if (passengers) {
+      const a = passengers.map((item) => {
+        return {
+          passenger_trip_id: null, // Make sure this is not null if it's required in PassengerTrip
+          trip: trip,
+          passenger: {
+            passenger_id: item.passengerid,
+            user_id: undefined, // Provide the user_id and other required properties
+            user: undefined,    // Make sure these match the structure of Passenger
+            address_id: undefined,
+            address: undefined,
+            campus_id: undefined, // Add required properties
+            campus: undefined,
+            trips: undefined,
+            absence: undefined,
+            // Add other required properties here
+          },
+          passengerid: item.passengerid,
+        };
+      });
 
-  remove(id: number) {
-    return `This action removes a #${id} trip`;
+      this.dataSource.createQueryBuilder().insert().into("passengers_trips").values(a).execute();
+       
+    }
+    return trip
   }
-}
+ }

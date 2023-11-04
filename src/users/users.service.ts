@@ -137,7 +137,6 @@ export class UsersService {
   async getUserDriverInfo(user_id:number):Promise<any>{
       const {user_id:user,...driver} = await this.driverRepository.findOne({where:{user_id},relations:["user_id"],relationLoadStrategy:"query"})
       const {hashpassword, ...restUser} = user as any;
-
       return {driver:driver,user:restUser};
     }
   async atualizaRegiao(user_id: number, regiaoDeAtuacao: Array<Coords>,preview:string) {
