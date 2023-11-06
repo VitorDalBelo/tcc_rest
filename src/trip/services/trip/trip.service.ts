@@ -123,6 +123,13 @@ export class TripService {
     return TripService.trips.has(trip);
   }
 
+  async  chengeStatus(trip_id:number,status:boolean) {
+    const trip = await this.tripRepository.findOne({where:{trip_id}});
+    trip.status = status
+    this.tripRepository.save(trip);
+    return trip
+  }
+
   async startTrip (trip:number,coords:{latitude:number,longitude:number}) {
      const route = await this.getGoRoute(trip,coords);
      TripService.trips.set(trip,route);
@@ -358,7 +365,7 @@ export class TripService {
     return await Absence.getPassengerAbsence(this.dataSource,dataFormatada,trip_id,user_id);
   }
 
-  async findOne(id: number) {
+  async findOne(id: number,removeAbsenses?:boolean) {
     const data = new Date();
     const ano = data.getFullYear();
     const mes = (data.getMonth() + 1).toString().padStart(2, '0'); // O mês é baseado em zero, por isso é necessário adicionar 1.
@@ -369,7 +376,7 @@ export class TripService {
     const absences = await Absence.getTripAbsence(this.dataSource,dataFormatada,id);
 
 
-    return await this.tripRepository.findOne({ 
+    const trip = await this.tripRepository.findOne({ 
       where: {
         trip_id: id,
       },
@@ -391,6 +398,10 @@ export class TripService {
     },
       relationLoadStrategy:"query",
     }).then(query=>({...query,absences:absences}))
+
+    if(removeAbsenses) trip.passengers = trip.passengers.filter((passenger)=> !absences.includes(String(passenger.passengerid)) ) ;
+
+    return trip;
     
   }
   

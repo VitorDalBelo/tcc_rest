@@ -38,12 +38,26 @@ export class UsersController {
     const user = req.user as User;
     return await this.usersService.getUserDriverInfo(user.user_id);
   }
+  @Get('/passengers/passenger/:id')
+  @UseGuards(AuthGuard('jwt'))
+  async getPassenger(@Param('id') id: string){
+    console.log(id)
+    return await this.usersService.getuser(Number(id));
+  }
+
+  @Get('/drivers/driver/:id')
+  @UseGuards(AuthGuard('jwt'))
+  async getDriver(@Param('id') id: string){
+    console.log(id)
+    return await this.usersService.getUserDriverInfo(Number(id));
+  }
 
   @Get('/drivers/search')
   @UseGuards(AuthGuard('jwt'))
   async searchDriver(@Req() req : Request){
+    console.log("aswed")
     const user = req.user as User;
-    if(user.profile !== "passenger") throw new ForbiddenException("apenas passageiros tem acesso a pesquisa de motoristas");
+    // if(user.profile !== "passenger") throw new ForbiddenException("apenas passageiros tem acesso a pesquisa de motoristas");
     return await this.usersService.getDriversForPassenger(req.query.name?String(req.query.name):undefined)    
   }
 

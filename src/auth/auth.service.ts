@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AccessToken } from './entities/access-token.entity';
 import { Repository } from 'typeorm';
 import { GoogleSingupInput } from './dto/googleSingupGoogle';
+import { Console } from 'console';
 
 
 @Injectable()
@@ -37,6 +38,7 @@ export class AuthService {
     const {password,...rest} = loginUserInput;
     const hashpassword = await bcrypt.hash(password,10);
     const newUser : any = { hashpassword,...rest};
+    console.log(loginUserInput)
     if(profile === "passenger" ) {
       if(loginUserInput.cnpj) throw new BadRequestException("Passageiros não possuem cnpj");
       const passenger = await this.userService.createPassenger(newUser);
@@ -45,6 +47,7 @@ export class AuthService {
       
     }
     else if(profile === "driver" ) {
+      console.log(loginUserInput)
       if(!loginUserInput.cnpj) throw new BadRequestException("É necessario informar o cnpj se cadastrar como motorista");
       if(loginUserInput.cpf) throw new BadRequestException("Motoristas não possuem cpf");
       newUser.cnpj = String(loginUserInput.cnpj).replace(/\D/g,'');

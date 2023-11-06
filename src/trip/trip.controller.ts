@@ -8,7 +8,9 @@ import {
   Delete, 
   UseGuards,
   Req, 
-  NotFoundException
+  NotFoundException,
+  Query,
+  BadRequestException
 } from '@nestjs/common';
 import { TripService } from './services/trip/trip.service';
 import { CreateTripDto } from './dto/create-trip.dto';
@@ -60,10 +62,10 @@ export class TripController {
     const user = req.user as User;
     if(user.profile == "passenger"){
       const userAbsences = await this.tripService.getPassengerAbsence(Number(id),user.user_id);
-      const trip = await this.tripService.findOne(Number(id));
+      const trip = await this.tripService.findOne(Number(id),true);
       return {...trip,userAbsences}
     }
-    return await this.tripService.findOne(Number(id));
+    return await this.tripService.findOne(Number(id),true);
   }
 
   @Post(':id/absence')
@@ -73,6 +75,17 @@ export class TripController {
     const passenger = await this.userService.getPassenger(user.user_id);
     if(!passenger) throw new NotFoundException("Passageiro não encontrado");
     return await this.absenceService.create(body,Number(id),passenger.passenger_id);
+  }
+
+
+  @Post(':id/statustrip')
+  @UseGuards(AuthGuard("jwt"))
+  async chengeTripStatus(@Param('id') id: string,@Req() req : Request,@Query("status") statusquery:string){
+    if(statusquery !== "true" && statusquery !== "false") throw new BadRequestException("stutus  errado");
+    const status = statusquery === "true";
+    
+    return await this.tripService.chengeStatus(Number(id),status)
+
   }
 
 

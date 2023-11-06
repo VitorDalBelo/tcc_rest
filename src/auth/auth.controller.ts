@@ -55,6 +55,8 @@ export class AuthController {
 
   @Post("/refresh")
   async refresh(@Req() req : Request){
+    console.log("refresh")
+    if(!req.headers.authorization) throw new BadRequestException("token n informado");
     const oldToken = req.headers.authorization.replace("Bearer ","");
     return this.authService.refresh(oldToken);
   }

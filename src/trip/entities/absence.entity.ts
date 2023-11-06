@@ -39,7 +39,7 @@ export class Absence {
     /**
      * name
      */
-    public static async getTripAbsence(datasource : DataSource , date:string,id:number) {
+    public static async getTripAbsence(datasource : DataSource , date:string,id:number) : Promise<Array<any>> {
       return await  datasource.query(`
         SELECT string_agg(CAST(a.passengerid AS TEXT), ',') AS passenger_ids
         FROM absences a

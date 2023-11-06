@@ -12,6 +12,7 @@ import { Address } from './entities/address.entity';
 import * as Yup from "yup";
 import { NotFoundError } from 'rxjs';
 import { Coords } from 'src/communIntefaces';
+import { Van } from './entities/van.entity';
 
 const   addressSchema  = Yup.object({
   bairro: Yup.string().required("O endereço não pode ser cadastrado sem o bairro"),
@@ -36,6 +37,8 @@ export class UsersService {
     private readonly userRepository : Repository<User>,
     @InjectRepository(Address)
     private readonly addressRepository : Repository<Address>,
+    @InjectRepository(Van)
+    private readonly vanRepository : Repository<Van>,
         
     private dataSource: DataSource,
   ){}
@@ -106,6 +109,7 @@ export class UsersService {
         'u.google_account as google_account', 
         'u.photo as photo',
         'u.name as name',
+        'u.user_id as user_id',
         'v.license_plate as license_plate',
         'v.model as van_model'
       ])
@@ -175,6 +179,10 @@ export class UsersService {
 
  async getPassenger(user_id:number){
   return await this.passengerRepository.findOne({where:{user_id}})
+ }
+
+ async getuser(user_id:number){
+  return await this.userRepository.findOne({where:{user_id}})
  }
 
   async createPassenger(newPassenger : CreatePassengerDto) : Promise<GetPassengerDto> {
@@ -255,6 +263,7 @@ export class UsersService {
    }
 
    async createDriverGoogle(newDriver : any) {
+    console.log(newDriver);
     const userExits = await this.findOne(newDriver.email)
     if(userExits) throw new ConflictException("Existe outro usuário com este email");
     const queryRunner = this.dataSource.createQueryRunner();
@@ -272,7 +281,9 @@ export class UsersService {
     try{
       const userEntity : User =  await this.userRepository.create(user);
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
-      const passenger = {cnpj:cnpj,user_id:userInfo.user_id};
+      const vanEntity = this.vanRepository.create(newDriver.van as Van);
+      const {van_id} = await queryRunner.manager.save(vanEntity);
+      const passenger = {cnpj:cnpj,user_id:userInfo.user_id,descricao:newDriver.descricao,van_id:van_id};
       const driverEntity =  await this.driverRepository.create(passenger);
       const {regiaoDeAtuacao,...driverInfo} = await queryRunner.manager.save(driverEntity);
       await queryRunner.commitTransaction();
@@ -286,7 +297,7 @@ export class UsersService {
       await queryRunner.release();
     }
   }
-  async createDriver(newDriver : CreateDriverDto) {
+  async createDriver(newDriver : any) {
     const userExits = await this.findOne(newDriver.email)
     if(userExits) throw new ConflictException("Existe outro usuário com este email");
     const queryRunner = this.dataSource.createQueryRunner();
@@ -298,11 +309,14 @@ export class UsersService {
       hashpassword: newDriver.hashpassword,
       email:newDriver.email,
       profile: "driver",
+      phone: newDriver.phone
      };
     try{
       const userEntity : User =  await this.userRepository.create(user);
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
-      const passenger = {cnpj:cnpj,user_id:userInfo.user_id};
+      const vanEntity = this.vanRepository.create(newDriver.van as Van);
+      const {van_id} = await queryRunner.manager.save(vanEntity);
+      const passenger = {cnpj:cnpj,user_id:userInfo.user_id,descricao:newDriver.descricao,van_id:van_id};
       const driverEntity =  await this.driverRepository.create(passenger);
       const {regiaoDeAtuacao,...driverInfo} = await queryRunner.manager.save(driverEntity);
       await queryRunner.commitTransaction();
