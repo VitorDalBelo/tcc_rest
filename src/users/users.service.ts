@@ -276,8 +276,11 @@ export class UsersService {
       profile: "driver",
       phone: newDriver.phone,
       photo: newDriver.photo,
-      google_account:newDriver.google_account
+      google_account:newDriver.google_account,
      };
+     if(newDriver.desc) newDriver.descricao = newDriver.desc;  
+     if(newDriver.van && newDriver.van.placa) newDriver.van.license_plate = newDriver.van.placa;
+     if(newDriver.van && newDriver.van.modelo) newDriver.van.model = newDriver.van.modelo;
     try{
       const userEntity : User =  await this.userRepository.create(user);
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
@@ -311,6 +314,9 @@ export class UsersService {
       profile: "driver",
       phone: newDriver.phone
      };
+     if(newDriver.desc) newDriver.descricao = newDriver.desc;  
+     if(newDriver.van && newDriver.van.placa) newDriver.van.license_plate = newDriver.van.placa;
+     if(newDriver.van && newDriver.van.modelo) newDriver.van.model = newDriver.van.modelo;
     try{
       const userEntity : User =  await this.userRepository.create(user);
       const {hashpassword,...userInfo} = await queryRunner.manager.save(userEntity);
